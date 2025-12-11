@@ -1,23 +1,23 @@
-export function cleanInput(input: string): string[] {
-  return input
-  .toLowerCase()
-  .split(" ")
-  .filter(i => i);
-}
-
-
 import { createInterface } from 'node:readline';
-import { stdin, stdout } from 'node:process';
+import { exit, stdin, stdout } from 'node:process';
+import { commandExit } from "./command_exit.js"
+import { getCommands } from './commands.js';
+
 const rl = createInterface({
     input: stdin,
     output: stdout,
     prompt: "Pokedex >"
 });
 
-function callback(line: string): void{
+function onPrompt(line: string): void{
     const words = cleanInput(line);
-    if(words.length){
-        console.log(`Your command was: ${words[0]}`);
+    if(words.length === 0){
+        rl.prompt();
+    }
+    const commands = getCommands();
+    const command = commands[words[0]];
+    if(command){
+         command.callback(commands);
     }
     rl.prompt();
 }
@@ -25,5 +25,12 @@ function callback(line: string): void{
 export function startREPL() : void{
 
     rl.prompt();
-    rl.on('line', callback);
+    rl.on('line', onPrompt);
+}
+
+export function cleanInput(input: string): string[] {
+  return input
+  .toLowerCase()
+  .split(" ")
+  .filter(i => i);
 }
