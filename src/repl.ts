@@ -1,7 +1,7 @@
 import { State } from './state.js';
 
 function makeOnPrompt(state: State) {
-    return (line: string) => {
+    return async (line: string) => {
         const words = cleanInput(line);
         if(words.length === 0){
             state.readline.prompt();
@@ -15,7 +15,7 @@ function makeOnPrompt(state: State) {
             return;
         }
         try{
-            command.callback(state);
+            await command.callback(state);
         }catch(err){
             console.log(err);
         }
