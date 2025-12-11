@@ -1,31 +1,32 @@
-import { createInterface } from 'node:readline';
-import { exit, stdin, stdout } from 'node:process';
-import { commandExit } from "./command_exit.js"
-import { getCommands } from './commands.js';
+import { State } from './state.js';
 
-const rl = createInterface({
-    input: stdin,
-    output: stdout,
-    prompt: "Pokedex >"
-});
+function makeOnPrompt(state: State) {
+    return (line: string) => {
+        const words = cleanInput(line);
+        if(words.length === 0){
+            state.readline.prompt();
+        }
+        const commandEntered = words[0];
+        const commands = state.commands;
+        const command = commands[commandEntered];
+        if(!command){
+            console.log(`Unknown command: "${commandEntered}". Type "help" for a list of commands.`,);       
+            state.readline.prompt();
+            return;
+        }
+        try{
+            command.callback(state);
+        }catch(err){
+            console.log(err);
+        }
+        state.readline.prompt();
+    }
 
-function onPrompt(line: string): void{
-    const words = cleanInput(line);
-    if(words.length === 0){
-        rl.prompt();
-    }
-    const commands = getCommands();
-    const command = commands[words[0]];
-    if(command){
-         command.callback(commands);
-    }
-    rl.prompt();
 }
 
-export function startREPL() : void{
-
-    rl.prompt();
-    rl.on('line', onPrompt);
+export function startREPL(state: State) : void{
+    state.readline.prompt();
+    state.readline.on('line', makeOnPrompt(state));
 }
 
 export function cleanInput(input: string): string[] {
