@@ -32,7 +32,9 @@ export class Cache{
     }
 
     stopReapLoop(): void{
-        clearInterval(this.#reapIntervalId);
-        this.#reapIntervalId = undefined;
+        if (this.#reapIntervalId) {
+            clearInterval(this.#reapIntervalId);
+            this.#reapIntervalId = undefined;
+        }
     }
 }
