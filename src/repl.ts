@@ -1,3 +1,4 @@
+import { callbackify } from 'node:util';
 import { State } from './state.js';
 
 function makeOnPrompt(state: State) {
@@ -6,22 +7,21 @@ function makeOnPrompt(state: State) {
         if(words.length === 0){
             state.readline.prompt();
         }
-        const commandEntered = words[0];
-        const commands = state.commands;
-        const command = commands[commandEntered];
+
+        const [commandEntered, ...args] = words;
+        const command = state.commands[commandEntered];
         if(!command){
             console.log(`Unknown command: "${commandEntered}". Type "help" for a list of commands.`,);       
             state.readline.prompt();
             return;
         }
         try{
-            await command.callback(state);
+            await command.callback(state, ...args);
         }catch(err){
             console.log(err);
         }
         state.readline.prompt();
     }
-
 }
 
 export function startREPL(state: State) : void{
